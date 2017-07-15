@@ -1,5 +1,8 @@
+manual/.settings
 target
 .idea
 *.i??
 .classpath
 .project
+*.prefs
+*.jar

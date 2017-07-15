@@ -37,6 +37,7 @@ import org.apache.karaf.eik.core.internal.KarafCorePluginActivator;
 import org.apache.karaf.eik.core.shell.KarafSshConnectionUrl;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -99,7 +100,8 @@ public class GenericKarafPlatformModel extends AbstractKarafPlatformModel implem
     public List<String> getBootClasspath() {
         final List<File> jarFiles = new ArrayList<File>();
         KarafCorePluginUtils.getJarFileList(rootPlatformPath.append("lib").toFile(), jarFiles, 0);
-
+        KarafCorePluginUtils.getJarFileList(rootPlatformPath.append("lib/boot").toFile(), jarFiles, 0);
+        
         final List<String> bootClasspath = new ArrayList<String>();
         for(final File f : jarFiles) {
             bootClasspath.add(f.getAbsolutePath());
@@ -193,8 +195,18 @@ public class GenericKarafPlatformModel extends AbstractKarafPlatformModel implem
         final Object adaptedObject;
         try {
             if (KarafCorePluginUtils.isKaraf(this)) {
-                final File file = getRootDirectory().append("lib").append("karaf.jar").toFile();
-                adaptedObject = new GenericKarafPlatformDetails(file);
+            	File karafJar = getRootDirectory().append("lib").append("karaf.jar").toFile();
+            	if (!karafJar.exists()) {
+            		final File bootDir = getRootDirectory().append("/lib/boot").toFile();
+            		File[] matchingFiles = bootDir.listFiles(new FilenameFilter() {
+            			public boolean accept(File dir, String name) {
+            				return name.startsWith("org.apache.karaf.main") && name.endsWith("jar");
+            			}
+            		});
+            		if ((matchingFiles != null) && (matchingFiles.length == 1))
+            			karafJar = matchingFiles[0];
+            	}
+            	adaptedObject = new GenericKarafPlatformDetails(karafJar);
             } else {
                 adaptedObject = null;
             }

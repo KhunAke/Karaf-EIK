@@ -18,8 +18,10 @@
  */
 package org.apache.karaf.eik.core.internal;
 
-import org.apache.karaf.eik.core.KarafPlatformValidator;
+import java.io.File;
+import java.io.FilenameFilter;
 
+import org.apache.karaf.eik.core.KarafPlatformValidator;
 import org.eclipse.core.runtime.IPath;
 
 public class GenericKarafPlatformValidator implements KarafPlatformValidator {
@@ -33,6 +35,15 @@ public class GenericKarafPlatformValidator implements KarafPlatformValidator {
         // First level is the Karaf JARs in the lib directory
         if (karafJar.toFile().exists()) {
             return true;
+        } else {
+        	final File bootDir = rootPath.append("/lib/boot").toFile();
+        	File[] matchingFiles = bootDir.listFiles(new FilenameFilter() {
+        		public boolean accept(File dir, String name) {
+        			return name.startsWith("org.apache.karaf.main") && name.endsWith("jar");
+        		}
+        	});
+        	if ((matchingFiles != null) && (matchingFiles.length == 1))
+        		return true;
         }
 
         /*

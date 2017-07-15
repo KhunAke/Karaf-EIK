@@ -179,8 +179,9 @@ public class KarafProjectBuilder extends IncrementalProjectBuilder {
             final String classpathEntry = itr.next();
             karafJar = new File(classpathEntry);
 
-            if (!karafJar.getName().equalsIgnoreCase("karaf.jar")) {
-                continue;
+            if ((!karafJar.getName().equalsIgnoreCase("karaf.jar")) &&
+            	(! (karafJar.getName().startsWith("org.apache.karaf.main") && karafJar.getName().endsWith("jar")))) {
+            		continue;
             }
 
             filterOsgiInterfaceClasses(karafJar);
